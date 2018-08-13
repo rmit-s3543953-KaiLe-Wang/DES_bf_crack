@@ -1,17 +1,19 @@
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.io.UnsupportedEncodingException;
 import javax.xml.bind.DatatypeConverter;
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Scanner;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 public class DES_BF {
 	static int[] targetInDec=new int[26];
+	static int files=0;
 	private final static char[] hexArray = "0123456789ABCDEF".toCharArray();
 	static int counter=0;
 	public static String bytesToHex(byte[] bytes) {
@@ -23,10 +25,11 @@ public class DES_BF {
 	    }
 	    return new String(hexChars);
 	}
+	/*
 	public static void outConsole(String decryptedMessage,String key,PrintWriter writer){
-		writer.println("message: "+decryptedMessage+"\t"+". key value of: 0x"+key.toString());
+		
 		//System.out.println("Decrypted message: "+decryptedMessage+"\t"+". With key value of: 0x"+key.toString());
-	}
+	}*/
 	public static byte[] hexStringToByteArray(String s) {
 	    int len = s.length();
 	    byte[] data = new byte[len / 2];
@@ -54,10 +57,28 @@ public class DES_BF {
 		byte[] decrypted = cipher.doFinal(encrypted);
 		return decrypted;
 	}
-	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
-		BigInteger[] dataIn=new BigInteger[10000];
+		System.out.println("How many file this time:)? ");
+		Scanner s=new Scanner(System.in);
+		files=s.nextInt();
+		try{
+		File readCount = new File("count.txt");
+		Scanner sc = new Scanner(readCount);
+		while(sc.hasNextInt())
+		{
+			counter =sc.nextInt();
+			files=files+counter;
+		}
+		sc.close();
+		System.out.println("continue from count:"+counter);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.exit(-1);
+		}
+		BigInteger[] dataIn=new BigInteger[100000];
 		/*1. set cyphertext and then convert to byte*/
 		String cypherTxtOrigin="ce126d2ddf2d1e64";
 		byte[] cipherTxtByte=hexStringToByteArray(cypherTxtOrigin);
@@ -68,19 +89,20 @@ public class DES_BF {
 		/*2.set key range also post-fix that's available*/
 		int postfix = Integer.parseInt("F666",16);
 		String post = Integer.toString(postfix);
-		System.out.println(post);
+		//System.out.println(post);
 		BigInteger keyMin=new BigInteger("0000000000");
 		BigInteger keyFix = new BigInteger(post);
-		BigInteger step = new BigInteger("1099511");
+		BigInteger step = new BigInteger("10995116");
 		BigInteger keyMax=new BigInteger("1099511627776");
-		for (int i =0;i<10000-2;i++)
+		for (int i =0;i<100000-2;i++)
 		{
 			dataIn[i]=BigInteger.ZERO;
-			BigInteger mult= new BigInteger(String.valueOf(i));
+			BigInteger mult= new BigInteger(String.valueOf(i+1));
 			dataIn[i]=dataIn[i].add(step.multiply(mult));
-			System.out.println(dataIn[i]);
+			//System.out.println(dataIn[i]);
 		}
-		dataIn[9999]=keyMax;
+		dataIn[99999]=keyMax;
+		//System.out.println(dataIn[99999]);
 		/*
 		BigInteger keyHalf = new BigInteger("549755813888");
 		BigInteger keyQuat = new BigInteger("274877906944");
@@ -89,7 +111,7 @@ public class DES_BF {
 		/*3. convert them to Hex string*/
 		//String KeyMinHex=keyMin.toString(16);
 		String KeyMaxHex=keyMax.toString(16);
-		System.out.println(KeyMaxHex+" L="+KeyMaxHex.length());
+		//System.out.println(KeyMaxHex+" L="+KeyMaxHex.length());
 		/*
 		 * String KeyHalfHex=keyHalf.toString(16);
 		   String KeyQuatHex=keyQuat.toString(16);
@@ -104,11 +126,11 @@ public class DES_BF {
 		byte[] keyAttempted =toByteArray("0000000000");
 		byte fixedB[] = toByteArray(fixHex);
 		try {	
-			for(int i=0;i<dataIn.length;i++)
+			for(int i=counter;i<dataIn.length;i++)
 			{
 				String filename="Decrypted"+counter+".txt";
 				PrintWriter writer = new PrintWriter(filename, "UTF-8");
-				while(keyMin.compareTo(dataIn[i])!=0)
+				while(keyMin.compareTo(dataIn[i])<=0)
 					//for (int i=0; i <100;i++)
 				{
 					long keyValInHex=keyMin.longValue();
@@ -129,17 +151,32 @@ public class DES_BF {
 					//increment
 					keyMin=keyMin.add(BigInteger.ONE);
 					String decryptedMessage = new String(dbyte);
-					outConsole(decryptedMessage,bytesToHex(key), writer);
+					writer.println("T:"+decryptedMessage+"\t"+"O:"+bytesToHex(dbyte)+"\t"+"K:0x"+bytesToHex(key));
 				}
 				System.out.println("One file compeleted! The file name is:"+filename);
 				counter++;
 				writer.close();
+				if(counter ==files)
+					break;
 			}
 		}
 		 catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		finally{
+			PrintWriter writer;
+			try {
+				writer = new PrintWriter("count.txt", "UTF-8");
+				writer.print(counter);
+				writer.close();
+			} catch (FileNotFoundException | UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			System.out.println("Program has terminated. Current count is: "+counter);
+		}
 }
 }
 
