@@ -36,7 +36,7 @@ public class DES_BF {
 	}
 	private static byte[] decrypt(byte[] rawKey, byte[] encrypted) throws Exception {
 		SecretKeySpec skeySpec = new SecretKeySpec(rawKey, "DES");
-		Cipher cipher = Cipher.getInstance("DES");
+		Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding");
 		cipher.init(Cipher.DECRYPT_MODE, skeySpec);
 		byte[] decrypted = cipher.doFinal(encrypted);
 		return decrypted;
