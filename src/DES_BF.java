@@ -102,7 +102,7 @@ public class DES_BF {
 			//System.out.println(dataIn[i]);
 		}
 		dataIn[99999]=keyMax;
-		//System.out.println(dataIn[99999]);
+		System.out.println(dataIn[101]+" "+dataIn[102]);
 		/*
 		BigInteger keyHalf = new BigInteger("549755813888");
 		BigInteger keyQuat = new BigInteger("274877906944");
@@ -128,6 +128,7 @@ public class DES_BF {
 		try {	
 			for(int i=counter;i<dataIn.length;i++)
 			{
+				keyMin=dataIn[i-1];
 				String filename="Decrypted"+counter+".txt";
 				PrintWriter writer = new PrintWriter(filename, "UTF-8");
 				while(keyMin.compareTo(dataIn[i])<=0)
