@@ -94,7 +94,7 @@ public class DES_BF {
 		BigInteger keyFix = new BigInteger(post);
 		BigInteger step = new BigInteger("10995116");
 		BigInteger keyMax=new BigInteger("1099511627776");
-		for (int i =0;i<100000-2;i++)
+		for (int i =0;i<4-2;i++)
 		{
 			dataIn[i]=BigInteger.ZERO;
 			BigInteger mult= new BigInteger(String.valueOf(i+1));
@@ -102,7 +102,6 @@ public class DES_BF {
 			//System.out.println(dataIn[i]);
 		}
 		dataIn[99999]=keyMax;
-		System.out.println(dataIn[101]+" "+dataIn[102]);
 		/*
 		BigInteger keyHalf = new BigInteger("549755813888");
 		BigInteger keyQuat = new BigInteger("274877906944");
@@ -128,25 +127,28 @@ public class DES_BF {
 		try {	
 			for(int i=counter;i<dataIn.length;i++)
 			{
-				keyMin=dataIn[i-1];
+				System.out.println(counter);
+				keyMin=counter==0?BigInteger.ZERO:dataIn[i];
 				String filename="Decrypted"+counter+".txt";
 				PrintWriter writer = new PrintWriter(filename, "UTF-8");
-				while(keyMin.compareTo(dataIn[i])<=0)
-					//for (int i=0; i <100;i++)
+				//while(keyMin.compareTo(dataIn[i+1])<=0)
+					for(int x =0;x<3;x++)
 				{
-					long keyValInHex=keyMin.longValue();
-					keyAttempted =toByteArray(Long.toHexString(keyValInHex));
-					if(keyAttempted.length<6)
+					long keyVal=keyMin.longValue();
+					keyAttempted =toByteArray(Long.toHexString(keyVal));//convert lower bound from int to hex.
+					//Note: all 0's will be discarded if the number is small.
+					if(keyAttempted.length<5)
 					{
-						byte[] temp = new byte[6];
-						System.arraycopy(keyAttempted, 0, temp, 6-keyAttempted.length, keyAttempted.length);
+						byte[] temp = new byte[5];//The maximum length is 6.
+						System.arraycopy(keyAttempted, 0, temp, 5-keyAttempted.length, keyAttempted.length);
 						keyAttempted=temp;
+						System.out.println("original Key: "+bytesToHex(keyAttempted));
 					}
 					//key+postfix
 					byte[] key = new byte[keyAttempted.length + fixedB.length];
-					System.arraycopy(keyAttempted, 0, key, 0, keyAttempted.length);
-					System.arraycopy(fixedB, 0, key, keyAttempted.length, fixedB.length);
-					//System.out.println("keyat: "+key.length+"fix: "+fixedB.length+"key length: "+key.length+" key:"+bytesToHex(key));
+					System.arraycopy(keyAttempted, 0, key, 1, keyAttempted.length);
+					System.arraycopy(fixedB, 0, key, keyAttempted.length+1, fixedB.length);
+					System.out.println("keyat: "+key.length+"fix: "+fixedB.length+"key length: "+key.length+" key:"+bytesToHex(key));
 					//decrypt
 					byte[] dbyte = decrypt(key,cipherTxtByte);
 					//increment
@@ -154,11 +156,13 @@ public class DES_BF {
 					String decryptedMessage = new String(dbyte);
 					writer.println("T:"+decryptedMessage+"\t"+"O:"+bytesToHex(dbyte)+"\t"+"K:0x"+bytesToHex(key));
 				}
+					break;
+					/*
 				System.out.println("One file compeleted! The file name is:"+filename);
 				counter++;
 				writer.close();
 				if(counter ==files)
-					break;
+					break;*/
 			}
 		}
 		 catch (Exception e) {
